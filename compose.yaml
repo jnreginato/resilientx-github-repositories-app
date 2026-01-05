@@ -1,0 +1,26 @@
+name: resilientx
+services:
+  nginx_backend:
+    build:
+      context: .
+      dockerfile: ./docker/nginx_backend/Dockerfile
+    container_name: resilientx-nginx_backend
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+      - "8081:443"
+      - "8082:9001"
+    volumes:
+      - ./backend:/var/www
+      - ./docker/nginx_backend/log:/var/log/nginx
+  php:
+    build:
+      context: .
+      dockerfile: ./docker/php/Dockerfile
+      target: final
+    container_name: resilientx-php
+    restart: unless-stopped
+    volumes:
+      - ./backend:/var/www
+      - ./docker/php/log:/var/log
+      - ./docker/php/tmp:/tmp
