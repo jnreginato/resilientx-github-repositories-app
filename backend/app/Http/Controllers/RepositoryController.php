@@ -11,12 +11,26 @@ use App\Services\GitHubService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
-final class RepositoryController extends Controller
+/**
+ * Controller responsible for handling repository-related operations.
+ */
+final readonly class RepositoryController
 {
-    public function __construct(
-        private readonly GitHubService $gitHubService
-    ) {}
+    /**
+     * Constructor method.
+     *
+     * @param GitHubService $gitHubService An instance of GitHubService.
+     */
+    public function __construct(private GitHubService $gitHubService)
+    {
+    }
 
+    /**
+     * Handles the index action for searching repositories.
+     *
+     * @param SearchRepositoryRequest $request The request instance containing validated search parameters.
+     * @return AnonymousResourceCollection A collection of repository resources.
+     */
     public function index(SearchRepositoryRequest $request): AnonymousResourceCollection
     {
         $result = $this->gitHubService->searchRepositories(
@@ -27,12 +41,17 @@ final class RepositoryController extends Controller
         return RepositoryResource::collection($result);
     }
 
+    /**
+     * Retrieves and displays repository details.
+     *
+     * @param string $owner The username or organization name that owns the repository.
+     * @param string $repo The name of the repository.
+     * @return JsonResponse A JSON response containing the repository details.
+     */
     public function show(string $owner, string $repo): JsonResponse
     {
         $repository = $this->gitHubService->getRepository($owner, $repo);
 
-        return response()->json(
-            new RepositoryDetailResource($repository)
-        );
+        return response()->json(new RepositoryDetailResource($repository));
     }
 }
