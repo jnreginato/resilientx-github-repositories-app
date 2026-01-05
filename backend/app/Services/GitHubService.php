@@ -8,9 +8,12 @@ use App\Exceptions\GitHubRateLimitException;
 use App\Exceptions\GitHubUnavailableException;
 use App\Exceptions\RepositoryNotFoundException;
 use Illuminate\Http\Client\Response;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Throwable;
 
+use function md5;
+use function sprintf;
 use function str_contains;
 use function strtolower;
 
@@ -42,15 +45,21 @@ final class GitHubService
      */
     public function searchRepositories(string $query, int $page = 1): array
     {
-        $response = Http::acceptJson()
-            ->get("$this->baseUrl/search/repositories", [
-                'q' => $query,
-                'page' => $page,
-            ]);
+        $cacheKey = sprintf('github.search.%s.page.%d', md5($query), $page);
 
-        $this->handleErrors($response);
+        return Cache::remember($cacheKey, now()->addSeconds(60), function () use ($query, $page) {
+            $response = Http::acceptJson()->get(
+                "$this->baseUrl/search/repositories",
+                [
+                    'q' => $query,
+                    'page' => $page,
+                ]
+            );
 
-        return $response->json('items');
+            $this->handleErrors($response);
+
+            return $response->json('items');
+        });
     }
 
     /**
@@ -63,11 +72,15 @@ final class GitHubService
      */
     public function getRepository(string $owner, string $repo): array
     {
-        $response = Http::acceptJson()->get("$this->baseUrl/repos/$owner/$repo");
+        $cacheKey = sprintf('github.repo.%s.%s', strtolower($owner), strtolower($repo));
 
-        $this->handleErrors($response);
+        return Cache::remember($cacheKey, now()->addSeconds(60), function () use ($owner, $repo) {
+            $response = Http::acceptJson()->get("$this->baseUrl/repos/$owner/$repo");
 
-        return $response->json();
+            $this->handleErrors($response);
+
+            return $response->json();
+        });
     }
 
     /**
