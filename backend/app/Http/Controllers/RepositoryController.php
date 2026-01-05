@@ -10,6 +10,7 @@ use App\Http\Resources\RepositoryResource;
 use App\Services\GitHubService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Throwable;
 
 /**
  * Controller responsible for handling repository-related operations.
@@ -30,6 +31,7 @@ final readonly class RepositoryController
      *
      * @param SearchRepositoryRequest $request The request instance containing validated search parameters.
      * @return AnonymousResourceCollection A collection of repository resources.
+     * @throws Throwable If an error occurs while making the API request.
      */
     public function index(SearchRepositoryRequest $request): AnonymousResourceCollection
     {
@@ -47,6 +49,7 @@ final readonly class RepositoryController
      * @param string $owner The username or organization name that owns the repository.
      * @param string $repo The name of the repository.
      * @return JsonResponse A JSON response containing the repository details.
+     * @throws Throwable If an error occurs while making the API request.
      */
     public function show(string $owner, string $repo): JsonResponse
     {

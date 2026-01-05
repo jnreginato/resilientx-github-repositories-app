@@ -6,6 +6,11 @@ namespace App\Exceptions;
 
 use Exception;
 
-class GitHubApiException extends Exception
+/**
+ * Represents a base class for exceptions specific to GitHub API interactions.
+ * This abstract class is intended to be extended by more specific exceptions
+ * related to GitHub API errors.
+ */
+abstract class GitHubApiException extends Exception
 {
 }
