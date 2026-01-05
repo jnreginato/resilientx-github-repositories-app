@@ -1,0 +1,21 @@
+{
+  "name": "jnreginato/resilientx-github-repositories-app",
+  "description": "Laravel REST API integrated with GitHub Repositories API, paired with a Vue 3 Single Page Application for searching and viewing repository data.",
+  "license": "proprietary",
+  "type": "project",
+  "authors": [
+    {
+      "name": "Jonatan Reginato",
+      "email": "jonatan.reginato@gmail.com",
+      "homepage": "https://github.com/jnreginato",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": "^8.4"
+  },
+  "require-dev": {
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
+}
