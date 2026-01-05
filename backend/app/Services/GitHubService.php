@@ -4,9 +4,15 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use Illuminate\Http\Client\ConnectionException;
-use Illuminate\Http\Client\RequestException;
+use App\Exceptions\GitHubRateLimitException;
+use App\Exceptions\GitHubUnavailableException;
+use App\Exceptions\RepositoryNotFoundException;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
+use Throwable;
+
+use function str_contains;
+use function strtolower;
 
 /**
  * A service class for interacting with the GitHub API.
@@ -32,8 +38,7 @@ final class GitHubService
      * @param string $query The search query.
      * @param int $page The page number.
      * @return array<string, mixed> The list of repositories.
-     * @throws RequestException If the request fails due to an HTTP error.
-     * @throws ConnectionException If the request fails due to a connection error.
+     * @throws Throwable If an error occurs while making the API request.
      */
     public function searchRepositories(string $query, int $page = 1): array
     {
@@ -41,8 +46,9 @@ final class GitHubService
             ->get("$this->baseUrl/search/repositories", [
                 'q' => $query,
                 'page' => $page,
-            ])
-            ->throw();
+            ]);
+
+        $this->handleErrors($response);
 
         return $response->json('items');
     }
@@ -53,14 +59,41 @@ final class GitHubService
      * @param string $owner The username or organization name that owns the repository.
      * @param string $repo The name of the repository.
      * @return array<string, mixed> The repository details.
-     * @throws RequestException If the request fails due to an HTTP error.
-     * @throws ConnectionException If the request fails due to a connection error.
+     * @throws Throwable If an error occurs while making the API request.
      */
     public function getRepository(string $owner, string $repo): array
     {
-        return Http::acceptJson()
-            ->get("$this->baseUrl/repos/$owner/$repo")
-            ->throw()
-            ->json();
+        $response = Http::acceptJson()->get("$this->baseUrl/repos/$owner/$repo");
+
+        $this->handleErrors($response);
+
+        return $response->json();
+    }
+
+    /**
+     * Handles errors in the GitHub API response and throws appropriate exceptions.
+     *
+     * @param Response $response The HTTP response received from the GitHub API.
+     * @throws RepositoryNotFoundException If the repository is not found (HTTP 404 status).
+     * @throws GitHubRateLimitException If the GitHub API rate limit is exceeded (HTTP 403 status with a rate limit message).
+     * @throws GitHubUnavailableException If the GitHub API is unavailable (server error or unexpected failure).
+     */
+    private function handleErrors(Response $response): void
+    {
+        if ($response->status() === 404) {
+            throw new RepositoryNotFoundException('Repository not found.');
+        }
+
+        if ($response->status() === 403 && str_contains(strtolower($response->body()), 'rate limit')) {
+            throw new GitHubRateLimitException('GitHub API rate limit exceeded.');
+        }
+
+        if ($response->serverError()) {
+            throw new GitHubUnavailableException('GitHub API is unavailable.');
+        }
+
+        if ($response->failed()) {
+            throw new GitHubUnavailableException('Unexpected GitHub API error.');
+        }
     }
 }
