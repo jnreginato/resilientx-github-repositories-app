@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import SearchView from '../views/SearchView.vue';
-import RepositoryDetailView from '../views/RepositoryDetailView.vue';
+import SearchView from '@/pages/Repositories.vue';
+import RepositoryDetailView from '@/pages/RepositoryDetail.vue';
 
 const routes = [
   {
