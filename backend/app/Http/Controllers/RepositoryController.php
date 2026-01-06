@@ -9,7 +9,6 @@ use App\Http\Resources\RepositoryDetailResource;
 use App\Http\Resources\RepositoryResource;
 use App\Services\GitHubService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Throwable;
 
 /**
@@ -30,17 +29,21 @@ final readonly class RepositoryController
      * Handles the index action for searching repositories.
      *
      * @param SearchRepositoryRequest $request The request instance containing validated search parameters.
-     * @return AnonymousResourceCollection A collection of repository resources.
+     * @return JsonResponse A JSON response containing the list of repositories and pagination metadata.
      * @throws Throwable If an error occurs while making the API request.
      */
-    public function index(SearchRepositoryRequest $request): AnonymousResourceCollection
+    public function index(SearchRepositoryRequest $request): JsonResponse
     {
         $result = $this->gitHubService->searchRepositories(
             query: $request->validated('query'),
-            page: $request->validated('page', 1),
+            page: $request->validated('page'),
+            perPage: $request->validated('per_page'),
         );
 
-        return RepositoryResource::collection($result);
+        return response()->json([
+            'data' => RepositoryResource::collection($result['items']),
+            'metadata' => $result['pagination'],
+        ]);
     }
 
     /**

@@ -28,11 +28,14 @@ final class SearchRepositoryRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        if ($this->has('page')) {
-            $this->merge([
-                'page' => (int) $this->input('page'),
-            ]);
-        }
+        $this->merge([
+            'page' => $this->has('page')
+                ? (int) $this->input('page')
+                : 1,
+            'per_page' => $this->has('per_page')
+                ? min((int) $this->input('per_page'), 100)
+                : 10,
+        ]);
     }
 
     /**
@@ -44,7 +47,8 @@ final class SearchRepositoryRequest extends FormRequest
     {
         return [
             'query' => ['required', 'string', 'min:2'],
-            'page' => ['nullable', 'integer', 'min:1'],
+            'page' => ['integer', 'min:1'],
+            'per_page' => ['integer', 'min:1', 'max:100'],
         ];
     }
 }

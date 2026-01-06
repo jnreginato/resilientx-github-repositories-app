@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Exceptions\GitHubRateLimitException;
+use App\Exceptions\GitHubSearchLimitException;
 use App\Exceptions\GitHubUnavailableException;
 use App\Exceptions\RepositoryNotFoundException;
 use Illuminate\Http\Client\Response;
@@ -43,22 +44,43 @@ final class GitHubService
      * @return array<string, mixed> The list of repositories.
      * @throws Throwable If an error occurs while making the API request.
      */
-    public function searchRepositories(string $query, int $page = 1): array
+    public function searchRepositories(string $query, int $page, int $perPage): array
     {
-        $cacheKey = sprintf('github.search.%s.page.%d', md5($query), $page);
+        $offset = ($page - 1) * $perPage;
 
-        return Cache::remember($cacheKey, now()->addSeconds(60), function () use ($query, $page) {
+        if ($offset >= 1000) {
+            throw new GitHubSearchLimitException('Only the first 1000 search results are available.');
+        }
+
+        $cacheKey = sprintf('github.search.%s.page.%d.size.%d', md5($query), $page, $perPage);
+
+        return Cache::remember($cacheKey, now()->addSeconds(60), function () use ($query, $page, $perPage) {
             $response = Http::acceptJson()->get(
                 "$this->baseUrl/search/repositories",
                 [
                     'q' => $query,
                     'page' => $page,
+                    'per_page' => $perPage,
                 ]
             );
 
             $this->handleErrors($response);
 
-            return $response->json('items');
+            $total = min(
+                $response->json('total_count', 0),
+                1000
+            );
+
+            return [
+                'items' => $response->json('items'),
+                'pagination' => [
+                    'count' => count($response->json('items')),
+                    'current_page' => $page,
+                    'per_page' => $perPage,
+                    'total_items' => $total,
+                    'total_pages' => (int) ceil($total / $perPage),
+                ],
+            ];
         });
     }
 
