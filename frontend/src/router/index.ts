@@ -1,17 +1,23 @@
-import { createRouter, createWebHistory } from 'vue-router';
-import SearchView from '@/pages/Repositories.vue';
-import RepositoryDetailView from '@/pages/RepositoryDetail.vue';
+import {createRouter, createWebHistory, RouteRecordRaw} from 'vue-router';
+import RepositoriesPage from '@/pages/RepositoriesPage.vue';
+import RepositoryDetail from "@/pages/RepositoryDetail.vue";
 
-const routes = [
+const routes: RouteRecordRaw[] = [
   {
     path: '/',
+    redirect: '/repositories'
+  },
+  {
+    path: '/repositories',
     name: 'search',
-    component: SearchView,
+    component: RepositoriesPage,
+    meta: {title: 'ResilientX - Search Repositories'},
   },
   {
     path: '/repositories/:owner/:repo',
     name: 'repository-detail',
-    component: RepositoryDetailView,
+    component: RepositoryDetail,
+    meta: {title: 'ResilientX - Repository Detail'},
     props: true,
   },
 ];
@@ -19,6 +25,12 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+});
+
+router.afterEach((to) => {
+  if (to.meta?.title) {
+    document.title = String(to.meta.title);
+  }
 });
 
 export default router;
