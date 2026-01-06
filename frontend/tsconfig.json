@@ -19,11 +19,5 @@
       "@/*": ["src/*"]
     }
   },
-  "include": [
-    "env.d.ts",
-    "src/**/*.ts",
-    "src/**/*.vue",
-    "vite.config.ts",
-    "eslint.config.ts",
-  ]
+  "include": ["env.d.ts", "src/**/*.ts", "src/**/*.vue", "vite.config.ts", "eslint.config.ts"]
 }

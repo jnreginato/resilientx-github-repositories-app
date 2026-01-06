@@ -15,17 +15,17 @@
  * @property {string} updated_at The ISO 8601 formatted timestamp when the repository was last updated.
  */
 export interface Repository {
-  id: number;
-  name: string;
-  full_name: string;
-  owner: string;
-  description: string | null;
-  stars: number;
-  forks: number;
-  language: string | null;
-  html_url: string;
-  created_at: string;
-  updated_at: string;
+  id: number
+  name: string
+  full_name: string
+  owner: string
+  description: string | null
+  stars: number
+  forks: number
+  language: string | null
+  html_url: string
+  created_at: string
+  updated_at: string
 }
 
 /**
@@ -43,11 +43,11 @@ export interface Repository {
  * - `total_items`: The total number of items across all pages.
  */
 export interface PaginationMeta {
-  count: number;
-  current_page: number;
-  per_page: number;
-  total_pages: number;
-  total_items: number;
+  count: number
+  current_page: number
+  per_page: number
+  total_pages: number
+  total_items: number
 }
 
 /**
@@ -58,6 +58,6 @@ export interface PaginationMeta {
  * @property {PaginationMeta} metadata - Metadata information related to the pagination, such as current page, total items, etc.
  */
 export interface Paginated<T> {
-  data: T[];
-  metadata: PaginationMeta;
+  data: T[]
+  metadata: PaginationMeta
 }

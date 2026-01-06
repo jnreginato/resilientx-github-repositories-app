@@ -1,6 +1,6 @@
-import {Paginated, Repository} from "@/types/repository";
+import { Paginated, Repository } from '@/types/repository'
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? ''
 
 /**
  * Searches for repositories based on the specified query and optional pagination parameters.
@@ -13,32 +13,32 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
  * @throws {Error} If the request fails or the response is not OK.
  */
 export async function searchRepositories(params: {
-  query: string;
-  page?: number;
-  perPage?: number;
+  query: string
+  page?: number
+  perPage?: number
 }): Promise<Paginated<Repository>> {
-  const qs = new URLSearchParams();
+  const qs = new URLSearchParams()
 
-  qs.set('query', params.query);
+  qs.set('query', params.query)
 
   if (params.page) {
-    qs.set('page', String(params.page));
+    qs.set('page', String(params.page))
   }
 
   if (params.perPage) {
-    qs.set('per_page', String(params.perPage));
+    qs.set('per_page', String(params.perPage))
   }
 
   const res = await fetch(`${BASE_URL}/api/repositories?${qs}`, {
-    headers: {Accept: 'application/json'},
-  });
+    headers: { Accept: 'application/json' },
+  })
 
   if (!res.ok) {
-    const body = await res.json().catch(() => null);
-    throw new Error(body?.message ?? 'Error loading repositories');
+    const body = await res.json().catch(() => null)
+    throw new Error(body?.message ?? 'Error loading repositories')
   }
 
-  return await res.json() as Promise<Paginated<Repository>>;
+  return (await res.json()) as Promise<Paginated<Repository>>
 }
 
 /**
@@ -50,15 +50,14 @@ export async function searchRepositories(params: {
  * @throws {Error} If the request fails or the response is invalid.
  */
 export async function getRepository(owner: string, repo: string): Promise<Repository> {
-  const res = await fetch(
-    `${BASE_URL}/api/repositories/${owner}/${repo}`,
-    {headers: {Accept: 'application/json'}}
-  );
+  const res = await fetch(`${BASE_URL}/api/repositories/${owner}/${repo}`, {
+    headers: { Accept: 'application/json' },
+  })
 
   if (!res.ok) {
-    const body = await res.json().catch(() => null);
-    throw new Error(body?.message ?? 'Error loading repository');
+    const body = await res.json().catch(() => null)
+    throw new Error(body?.message ?? 'Error loading repository')
   }
 
-  return await res.json() as Promise<Repository>;
+  return (await res.json()) as Promise<Repository>
 }

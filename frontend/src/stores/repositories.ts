@@ -1,13 +1,13 @@
-import {defineStore} from 'pinia';
-import {ref} from 'vue';
-import {searchRepositories} from '@/lib/http';
-import type {Paginated, PaginationMeta, Repository} from '@/types/repository';
+import { defineStore } from 'pinia'
+import { ref } from 'vue'
+import { searchRepositories } from '@/lib/http'
+import type { Paginated, PaginationMeta, Repository } from '@/types/repository'
 
 export const useRepositoriesStore = defineStore('repositories', () => {
-  const loading = ref(false);
-  const error = ref<string | null>(null);
-  const repositories = ref<Repository[]>([]);
-  const query = ref('');
+  const loading = ref(false)
+  const error = ref<string | null>(null)
+  const repositories = ref<Repository[]>([])
+  const query = ref('')
 
   const meta = ref<PaginationMeta>({
     count: 0,
@@ -15,7 +15,7 @@ export const useRepositoriesStore = defineStore('repositories', () => {
     per_page: 10,
     total_pages: 1,
     total_items: 0,
-  });
+  })
 
   /**
    * Executes a search for repositories based on the current query and pagination parameters.
@@ -26,29 +26,29 @@ export const useRepositoriesStore = defineStore('repositories', () => {
    */
   async function search(page?: number): Promise<void> {
     if (!query.value) {
-      return;
+      return
     }
 
-    loading.value = true;
-    error.value = null;
+    loading.value = true
+    error.value = null
 
     try {
       const resp = (await searchRepositories({
         query: query.value,
         page: page ?? meta.value.current_page,
         perPage: meta.value.per_page,
-      })) as Paginated<Repository>;
+      })) as Paginated<Repository>
 
-      repositories.value = resp.data;
-      meta.value = resp.metadata;
+      repositories.value = resp.data
+      meta.value = resp.metadata
     } catch (e: unknown) {
       if (e instanceof Error) {
-        error.value = e.message;
+        error.value = e.message
       } else {
-        error.value = 'Error loading repositories. Try again later.';
+        error.value = 'Error loading repositories. Try again later.'
       }
     } finally {
-      loading.value = false;
+      loading.value = false
     }
   }
 
@@ -61,10 +61,10 @@ export const useRepositoriesStore = defineStore('repositories', () => {
    */
   async function goToPage(page: number) {
     if (page < 1 || page > meta.value.total_pages) {
-      return;
+      return
     }
-    meta.value.current_page = page;
-    await search(page);
+    meta.value.current_page = page
+    await search(page)
   }
 
   return {
@@ -75,5 +75,5 @@ export const useRepositoriesStore = defineStore('repositories', () => {
     meta,
     search,
     goToPage,
-  };
-});
+  }
+})
