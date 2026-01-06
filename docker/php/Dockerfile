@@ -37,6 +37,11 @@ RUN apk add --no-cache bash coreutils supervisor
 # Sets stop signal
 STOPSIGNAL SIGINT
 
+RUN chown -R www-data:www-data \
+    storage \
+    bootstrap/cache \
+    database
+
 # Set execute permission for entrypoint script and create log directories
 RUN chmod +x /entrypoint.sh && \
     mkdir -p /var/log/php /var/log/supervisor && chmod -R 777 /var/log
