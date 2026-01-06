@@ -24,3 +24,16 @@ services:
       - ./backend:/var/www
       - ./docker/php/log:/var/log
       - ./docker/php/tmp:/tmp
+
+  node:
+    build:
+      context: .
+      dockerfile: ./docker/node/Dockerfile
+    container_name: resilientx-node
+    restart: unless-stopped
+    ports:
+      - "5173:80"
+    volumes:
+      - ./frontend:/app
+    depends_on:
+      - nginx_backend
